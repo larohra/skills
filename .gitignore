@@ -1,0 +1,16 @@
+# Local demo captures, media, and Playwright state
+*.webm
+*.mp4
+*.mov
+*.wav
+*.png
+*.jpg
+*.har
+raw/
+storage-state*.json
+playwright/.auth/
+playwright-report/
+test-results/
+.env
+.env.*
+!.env.example
