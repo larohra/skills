@@ -32,9 +32,17 @@ waits during editing, and preserve the original capture before enhancing it.
 4. **Authenticate safely**
    - Never request, receive, type, log, or store passwords/MFA values.
    - Let the user complete company SSO interactively once.
-   - Export Playwright `storageState({ indexedDB: true })`; do not clone a Chrome
-     profile. Encrypted cookies may be invalidated outside the original process.
-   - Test the state in a fresh native Playwright context.
+   - For managed work portals, Conditional Access, device compliance, or
+     tenant-sensitive SSO, start with Chrome or Edge in a dedicated,
+     machine-local persistent profile.
+   - For applications whose authentication is fully represented by cookies,
+     local storage, and IndexedDB, prefer Playwright
+     `storageState({ indexedDB: true })` and verify it in a fresh context.
+   - Create persistent profile directories automatically; never attach to,
+     copy, or modify the user's default browser profile.
+   - Verify the authenticated tenant/directory before recording. Browser profile
+     isolation does not necessarily isolate Windows device SSO or server-side
+     tenant selection.
    - Read [references/sso-and-security.md](references/sso-and-security.md).
 
 5. **Record segmented scenes**
@@ -69,8 +77,11 @@ waits during editing, and preserve the original capture before enhancing it.
      transitions, highlights, and internal pages.
    - Check `ffprobe` duration/codecs and `volumedetect` audio levels.
    - Verify every scenario's expected marker/ID through UI or telemetry.
-   - Delete storage-state files, copied profiles, raw clips, keys, and temporary
-     screenshots. Retain final videos, storyboard, results, and scripts.
+   - Delete storage-state files, obsolete profiles, raw clips, keys, and
+     temporary screenshots. Retain a dedicated persistent profile only when the
+     user intentionally wants machine-local session reuse, and identify it as
+     sensitive authenticated state.
+   - Retain final videos, storyboard, results, and scripts.
 
 ## Quality contract
 
@@ -87,6 +98,8 @@ waits during editing, and preserve the original capture before enhancing it.
 ## Resources
 
 - `scripts/check_prereqs.ps1` — validate Chrome, FFmpeg, uv, and SAPI voices.
+- `scripts/open_persistent_browser.py` — create or reopen a dedicated Chrome or
+  Edge profile for interactive SSO.
 - `scripts/generate_narration.ps1` — generate Windows narration WAVs.
 - `scripts/generate_ambient_bed.py` — create a subtle license-free music bed.
 - `scripts/stitch_clips.py` — trim and concatenate scene recordings.
