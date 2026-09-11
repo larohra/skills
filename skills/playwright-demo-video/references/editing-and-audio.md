@@ -15,7 +15,11 @@ clear technical default; Zira is a good alternative.
 - Measure every WAV with `ffprobe`.
 - Schedule starts so speech does not overlap.
 - Narrate capability claims, not every click.
-- Keep sentences short enough for the visible scene.
+- Keep sentences short enough for the visible scene and use
+  `check_narration_gaps.py` to leave at least 0.8 seconds by default.
+- Do not finalize audio before the silent rough cut and visual claim-evidence
+  review are approved. If a narration claim cannot be located in a visible
+  frame, revise it or repair the capture.
 
 ## Background music
 
@@ -55,6 +59,8 @@ start, overlay window, storyboard timestamp, and chapter marker by `D`.
 ## Review
 
 - Generate a contact sheet every 10–20 seconds.
-- Inspect specific frames around every overlay.
+- Inspect specific frames around every overlay, plus each declared claim,
+  scene midpoint, and both sides of every transition.
 - Verify codecs/sample rate/duration with `ffprobe`.
 - Open the enhanced MP4 in a browser/video canvas for user review.
+- Read [editorial-qc.md](editorial-qc.md) for the reusable JSON-backed checks.

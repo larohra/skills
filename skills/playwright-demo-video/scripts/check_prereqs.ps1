@@ -18,6 +18,11 @@ function Add-Check {
 $uv = Get-Command uv -ErrorAction SilentlyContinue
 Add-Check "uv" ($null -ne $uv) $(if ($uv) { (& uv --version) } else { "Install uv" })
 
+$python = Get-Command python -ErrorAction SilentlyContinue
+$pythonVersion = if ($python) { (& python --version 2>&1) }
+$pythonAvailable = ($null -ne $python) -and ($LASTEXITCODE -eq 0)
+Add-Check "Python" $pythonAvailable $(if ($pythonAvailable) { $pythonVersion } else { "Install Python 3 or let uv manage Python" })
+
 $ffmpeg = Get-Command ffmpeg -ErrorAction SilentlyContinue
 Add-Check "ffmpeg" ($null -ne $ffmpeg) $(if ($ffmpeg) { (& ffmpeg -version | Select-Object -First 1) } else { "Install FFmpeg" })
 

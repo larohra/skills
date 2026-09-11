@@ -136,10 +136,14 @@ may be invalidated, and the profile contains sensitive authenticated material.
 - Seed localStorage with an init script; never type keys while recording.
 - Do not print keys, cookie values, tokens, connection strings, or storage state.
 - Keep auth state, dedicated profiles, and raw clips outside the repository.
-- Remove storage state, obsolete profiles, and temporary browser artifacts
-  after rendering.
+- Remove storage state, obsolete profiles, and temporary browser artifacts only
+  when they are explicitly owned by the current capture. Do not destructively
+  clean up a shared profile or cloud resource based on appearance alone.
 - Retain a dedicated persistent profile only with the user's intent to reuse
   it. Report its path and warn that it contains sensitive authenticated state.
+- A capture lock may record owner, scope, expiry, and release only. It is
+  coordination metadata, never a place to store credentials, cookies, tokens,
+  storage state, or a secret-bearing URL.
 
 ## Internal portals
 
