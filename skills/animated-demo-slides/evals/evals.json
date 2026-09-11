@@ -1,0 +1,23 @@
+{
+  "skill_name": "animated-demo-slides",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "I'm doing a tech talk next week about database connection pooling and I need to explain the concept to people who aren't super familiar with databases. I want to show: 1) a healthy state where the pool has 50 out of 100 connections busy handling requests with 50 idle, 2) what happens when traffic spikes and the pool becomes saturated (all 100 connections busy), 3) what recovery looks like with proper monitoring in place. Can you create an animated presentation that walks through these states visually? The audience will be mostly engineers and PMs from different teams so it needs to be clear even if someone's English isn't perfect.",
+      "expected_output": "A standalone HTML file with 3-4 animated slides showing the connection pool states, with visual indicators for busy (green), idle (dark), and waiting connections. Each slide should have labels and numbers, with smooth animations between states.",
+      "files": []
+    },
+    {
+      "id": 1,
+      "prompt": "I need to explain our API request flow to our design team before we do a major refactor. The flow goes: user request → load balancer → API gateway → microservice → database. I want each component to be visually distinct, and I want to show where latency issues typically occur (mostly at the database layer during peak load). Can you make this into slides that show the request flowing through each component with timing information? We want something we can use in a design review meeting next Friday.",
+      "expected_output": "A multi-slide presentation showing the API request flow, with each component represented visually, showing request path, and highlighting bottleneck areas.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "We had an incident last night where our cache layer went down and it cascaded into a database overload. I need to create a postmortem presentation showing: 1) normal operation (requests hitting cache, low latency), 2) cache failure moment (requests start missing cache), 3) database gets overwhelmed, 4) alerts fire and on-call team responds, 5) cache restored and things recover. Each slide should show the metric/status changing so people can see cause and effect. This needs to be clear for our all-hands meeting.",
+      "expected_output": "A 5-slide presentation showing the incident timeline with visual state changes, metric transitions, and recovery flow.",
+      "files": []
+    }
+  ]
+}
