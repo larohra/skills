@@ -235,6 +235,46 @@ def _stage_copy(source: Path, alias: Path, expected_sha256: str) -> Path:
         raise
 
 
+def _link_or_copy_exclusive(source: Path, destination: Path) -> None:
+    """Create a destination without replacing any existing file.
+
+    A hard link is atomic and avoids a second data copy on supported local file
+    systems. The exclusive-copy fallback keeps the same no-overwrite property
+    when hard links are unavailable.
+    """
+    try:
+        os.link(source, destination)
+        return
+    except FileExistsError as error:
+        raise EditorialInputError(
+            f"refusing to overwrite existing file: {destination}"
+        ) from error
+    except OSError:
+        pass
+    try:
+        with source.open("rb") as input_handle, destination.open("xb") as output_handle:
+            shutil.copyfileobj(input_handle, output_handle)
+    except FileExistsError as error:
+        raise EditorialInputError(
+            f"refusing to overwrite existing file: {destination}"
+        ) from error
+
+
+def _archive_named_alias(alias: Path, archive_target: Path, expected_sha256: str) -> None:
+    """Archive a known alias without replacing either path."""
+    _link_or_copy_exclusive(alias, archive_target)
+    if _sha256(archive_target) != expected_sha256:
+        raise EditorialInputError(f"archive checksum does not match alias: {alias.name}")
+    alias.unlink()
+
+
+def _publish_staged_alias(staged: Path, alias: Path, expected_sha256: str) -> None:
+    """Publish a staged copy without replacing an alias created by another process."""
+    _link_or_copy_exclusive(staged, alias)
+    if _sha256(alias) != expected_sha256:
+        raise EditorialInputError(f"promoted alias checksum mismatch: {alias.name}")
+
+
 def _write_new_file(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     try:
@@ -254,7 +294,7 @@ def promote(plan: PromotionPlan, delivery_dir: Path) -> dict[str, Any]:
                 f"file: {artifact.source.relative_to(root)}"
             )
     source_hashes = {artifact.source: _sha256(artifact.source) for artifact in plan.artifacts}
-    archive_targets: dict[Path, Path] = {}
+    archive_targets: dict[Path, tuple[Path, str]] = {}
     for artifact in plan.artifacts:
         if artifact.alias.exists():
             archive_target = (
@@ -263,7 +303,7 @@ def promote(plan: PromotionPlan, delivery_dir: Path) -> dict[str, Any]:
                 / "previous"
                 / artifact.alias.relative_to(root)
             )
-            archive_targets[artifact.alias] = archive_target
+            archive_targets[artifact.alias] = (archive_target, _sha256(artifact.alias))
 
     staged: list[tuple[Artifact, Path]] = []
     archived: list[dict[str, str]] = []
@@ -275,15 +315,16 @@ def promote(plan: PromotionPlan, delivery_dir: Path) -> dict[str, Any]:
             )
 
         for artifact, staged_path in staged:
-            archive_target = archive_targets.get(artifact.alias)
-            if archive_target is not None:
+            archive = archive_targets.get(artifact.alias)
+            if archive is not None:
+                archive_target, alias_sha256 = archive
                 archive_target.parent.mkdir(parents=True, exist_ok=True)
                 if archive_target.exists() or not artifact.alias.exists():
                     raise EditorialInputError(
                         "refusing to overwrite or race an alias/archive target: "
                         f"{artifact.alias}"
                     )
-                os.replace(artifact.alias, archive_target)
+                _archive_named_alias(artifact.alias, archive_target, alias_sha256)
                 archived.append(
                     {
                         "alias": str(artifact.alias.relative_to(root)),
@@ -295,22 +336,18 @@ def promote(plan: PromotionPlan, delivery_dir: Path) -> dict[str, Any]:
                     f"refusing to overwrite alias created during promotion: {artifact.alias}"
                 )
             try:
-                os.replace(staged_path, artifact.alias)
-            except OSError:
-                if archive_target is not None and archive_target.exists():
-                    os.replace(archive_target, artifact.alias)
-                raise
-            actual_sha256 = _sha256(artifact.alias)
-            expected_sha256 = source_hashes[artifact.source]
-            if actual_sha256 != expected_sha256:
-                raise EditorialInputError(
-                    f"promoted alias checksum mismatch: {artifact.alias.name}"
+                _publish_staged_alias(
+                    staged_path, artifact.alias, source_hashes[artifact.source]
                 )
+            except (EditorialInputError, OSError):
+                if archive is not None and archive_target.exists() and not artifact.alias.exists():
+                    _link_or_copy_exclusive(archive_target, artifact.alias)
+                raise
             promoted.append(
                 {
                     "source": str(artifact.source.relative_to(root)),
                     "alias": str(artifact.alias.relative_to(root)),
-                    "sha256": expected_sha256,
+                    "sha256": source_hashes[artifact.source],
                 }
             )
         created_at = datetime.now(UTC).isoformat().replace("+00:00", "Z")
