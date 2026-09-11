@@ -19,9 +19,18 @@ $uv = Get-Command uv -ErrorAction SilentlyContinue
 Add-Check "uv" ($null -ne $uv) $(if ($uv) { (& uv --version) } else { "Install uv" })
 
 $python = Get-Command python -ErrorAction SilentlyContinue
-$pythonVersion = if ($python) { (& python --version 2>&1) }
-$pythonAvailable = ($null -ne $python) -and ($LASTEXITCODE -eq 0)
-Add-Check "Python" $pythonAvailable $(if ($pythonAvailable) { $pythonVersion } else { "Install Python 3 or let uv manage Python" })
+$pythonOutput = if ($python) { @(& python --version 2>&1) }
+$pythonVersionMatch = if ($python -and $LASTEXITCODE -eq 0) {
+    [regex]::Match(($pythonOutput -join " "), "\d+\.\d+(?:\.\d+)?")
+}
+$pythonVersion = if ($pythonVersionMatch -and $pythonVersionMatch.Success) {
+    [version]$pythonVersionMatch.Value
+}
+$pythonAvailable = $null -ne $pythonVersion -and (
+    $pythonVersion.Major -gt 3 -or
+    ($pythonVersion.Major -eq 3 -and $pythonVersion.Minor -ge 9)
+)
+Add-Check "Python 3.9+" $pythonAvailable $(if ($pythonAvailable) { "Python $pythonVersion" } elseif ($pythonVersion) { "Requires Python 3.9+; found Python $pythonVersion" } else { "Install Python 3.9+ or let uv manage Python" })
 
 $ffmpeg = Get-Command ffmpeg -ErrorAction SilentlyContinue
 Add-Check "ffmpeg" ($null -ne $ffmpeg) $(if ($ffmpeg) { (& ffmpeg -version | Select-Object -First 1) } else { "Install FFmpeg" })

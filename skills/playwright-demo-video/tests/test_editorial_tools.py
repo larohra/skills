@@ -7,6 +7,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 SKILL_DIR = Path(__file__).resolve().parents[1]
 SCRIPTS_DIR = SKILL_DIR / "scripts"
@@ -14,8 +15,10 @@ sys.path.insert(0, str(SCRIPTS_DIR))
 
 from check_narration_gaps import check_narration_gaps
 from detect_static_waits import detect_static_regions, normalized_difference
+from editorial_common import EditorialInputError, require_number
 from extract_scene_qc import plan_qc_frames
 from inventory_trace_spans import inventory_export
+import promote_versioned_artifacts as promotion_module
 from promote_versioned_artifacts import preview, promote, validate_plan
 from validate_claim_evidence import validate_manifest
 from validate_continuity import validate_continuity
@@ -56,6 +59,62 @@ class ClaimEvidenceTests(unittest.TestCase):
         self.assertTrue(
             any("visible_hold_seconds" in issue["path"] for issue in report["errors"])
         )
+
+    def test_rejects_non_finite_timestamps_and_dry_run_frame_indexes(self) -> None:
+        with self.assertRaisesRegex(ValueError, "finite"):
+            require_number(float("nan"), "timestamp")
+
+        manifest = example_manifest()
+        report = validate_manifest(
+            manifest,
+            SKILL_DIR,
+            allow_missing_files=True,
+            min_completion_hold=3.0,
+            max_completion_hold=5.0,
+            frame_index={
+                "dry_run": True,
+                "frames": [
+                    {"kind": "claim", "scene_id": "request-completed"},
+                    {"kind": "claim", "scene_id": "session-resumes"},
+                ],
+            },
+        )
+        self.assertFalse(report["valid"])
+        self.assertTrue(
+            any(issue["path"] == "frame_index.dry_run" for issue in report["errors"])
+        )
+
+    def test_credits_only_existing_extracted_claim_frames(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            index_root = Path(temporary)
+            frames = index_root / "frames"
+            frames.mkdir()
+            (frames / "request.png").touch()
+            (frames / "resume.png").touch()
+            report = validate_manifest(
+                example_manifest(),
+                SKILL_DIR,
+                allow_missing_files=True,
+                min_completion_hold=3.0,
+                max_completion_hold=5.0,
+                frame_index={
+                    "dry_run": False,
+                    "frames": [
+                        {
+                            "kind": "claim",
+                            "scene_id": "request-completed",
+                            "file": "frames/request.png",
+                        },
+                        {
+                            "kind": "claim",
+                            "scene_id": "session-resumes",
+                            "file": "frames/resume.png",
+                        },
+                    ],
+                },
+                frame_index_base=index_root,
+            )
+            self.assertTrue(report["valid"], report["errors"])
 
 
 class NarrationAndFramePlanningTests(unittest.TestCase):
@@ -136,6 +195,26 @@ class ContinuityAndInventoryTests(unittest.TestCase):
             any("identity continuity failed" in issue["message"] for issue in bad["errors"])
         )
 
+    def test_lifecycle_evidence_must_be_distinct_and_ordered(self) -> None:
+        manifest = example_manifest()
+        continuity = manifest["chapters"][1]["scenes"][0]["continuity"]
+        continuity["after"]["evidence_shot_id"] = "idle-before"
+        same_frame = validate_continuity(manifest)
+        self.assertFalse(same_frame["valid"])
+        self.assertTrue(
+            any("distinct evidence shots" in issue["message"] for issue in same_frame["errors"])
+        )
+
+        manifest = example_manifest()
+        manifest["chapters"][1]["scenes"][0]["evidence_shots"][1][
+            "timestamp_seconds"
+        ] = 15.0
+        reversed_order = validate_continuity(manifest)
+        self.assertFalse(reversed_order["valid"])
+        self.assertTrue(
+            any("must precede after evidence" in issue["message"] for issue in reversed_order["errors"])
+        )
+
     def test_inventory_counts_otlp_spans_and_dependencies(self) -> None:
         trace_export = json.loads(
             (SKILL_DIR / "examples" / "trace-export.json").read_text(encoding="utf-8")
@@ -165,7 +244,9 @@ class ArtifactPromotionTests(unittest.TestCase):
                 ],
             }
             plan = validate_plan(document, root)
+            before_preview = {path.name for path in root.iterdir()}
             self.assertTrue(preview(plan, root)["dry_run"])
+            self.assertEqual({path.name for path in root.iterdir()}, before_preview)
             report = promote(plan, root)
 
             self.assertTrue(report["valid"])
@@ -214,6 +295,81 @@ class ArtifactPromotionTests(unittest.TestCase):
                     },
                     root,
                 )
+
+    def test_rejects_symlinked_archive_descendants(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary) / "deliverables"
+            outside = Path(temporary) / "outside"
+            root.mkdir()
+            outside.mkdir()
+            (root / "demo-v2.mp4").write_bytes(b"new video")
+            (root / "demo-latest.mp4").write_bytes(b"old video")
+            (root / "archive").mkdir()
+            try:
+                (root / "archive" / "v2").symlink_to(outside, target_is_directory=True)
+            except OSError as error:
+                self.skipTest(f"symlinks are unavailable in this environment: {error}")
+            with self.assertRaisesRegex(ValueError, "symlinks"):
+                validate_plan(
+                    {
+                        "version": "v2",
+                        "artifacts": [
+                            {"source": "demo-v2.mp4", "alias": "demo-latest.mp4"}
+                        ],
+                    },
+                    root,
+                )
+
+    def test_rolls_back_prior_aliases_when_later_publish_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / "demo-v2.mp4").write_bytes(b"new video")
+            (root / "demo-v2.manifest.json").write_text('{"version":"v2"}\n')
+            (root / "demo-latest.mp4").write_bytes(b"old video")
+            (root / "demo-latest.manifest.json").write_text('{"version":"v1"}\n')
+            plan = validate_plan(
+                {
+                    "version": "v2",
+                    "artifacts": [
+                        {"source": "demo-v2.mp4", "alias": "demo-latest.mp4"},
+                        {
+                            "source": "demo-v2.manifest.json",
+                            "alias": "demo-latest.manifest.json",
+                        },
+                    ],
+                },
+                root,
+            )
+            original_publish = promotion_module._publish_staged_alias
+
+            def fail_second_alias(staged: Path, alias: Path, checksum: str) -> None:
+                if alias.name == "demo-latest.manifest.json":
+                    raise EditorialInputError("injected publish failure")
+                original_publish(staged, alias, checksum)
+
+            with patch.object(
+                promotion_module, "_publish_staged_alias", side_effect=fail_second_alias
+            ):
+                with self.assertRaisesRegex(ValueError, "injected publish failure"):
+                    promote(plan, root)
+
+            self.assertEqual((root / "demo-latest.mp4").read_bytes(), b"old video")
+            self.assertEqual(
+                (root / "demo-latest.manifest.json").read_text(), '{"version":"v1"}\n'
+            )
+            self.assertFalse(
+                (root / "archive" / "v2" / "previous" / "demo-latest.mp4").exists()
+            )
+            self.assertFalse(
+                (
+                    root
+                    / "archive"
+                    / "v2"
+                    / "previous"
+                    / "demo-latest.manifest.json"
+                ).exists()
+            )
+            self.assertFalse((root / "promotion-v2.manifest.json").exists())
             with self.assertRaisesRegex(ValueError, "without '..'"):
                 validate_plan(
                     {

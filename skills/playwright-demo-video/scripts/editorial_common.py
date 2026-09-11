@@ -8,6 +8,7 @@ scripts that need to inspect or extract video frames.
 from __future__ import annotations
 
 import json
+import math
 import subprocess
 from collections.abc import Iterator
 from pathlib import Path
@@ -57,8 +58,8 @@ def require_number(value: Any, field: str) -> float:
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         raise EditorialInputError(f"{field} must be a number")
     result = float(value)
-    if result < 0:
-        raise EditorialInputError(f"{field} must be non-negative")
+    if not math.isfinite(result) or result < 0:
+        raise EditorialInputError(f"{field} must be a finite non-negative number")
     return result
 
 

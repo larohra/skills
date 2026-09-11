@@ -30,6 +30,22 @@ already prove?* A different portal, tab, or telemetry view is not enough.
 Before the final render, consolidate adjacent chapters that prove the same
 end-to-end user value; retain multiple scenes inside the surviving chapter.
 
+## Keep production manifests separate
+
+The claim-evidence contract is editorial metadata, not a replacement for the
+existing media-processing inputs. Keep three explicitly named JSON documents:
+
+| File | Consumed by | Purpose |
+| --- | --- | --- |
+| `claim-evidence.json` | The new validation/QC scripts | Chapters, claims, evidence frames, narration timing, and continuity. Its `video.source` names the completed silent master. |
+| `clips.json` | `stitch_clips.py` | Existing top-level `scenes` list with raw clip `path`, `start`, and `duration`. |
+| `mix.json` | `mix_audio_overlays.py` | Existing `source`, `output`, overlays, narration WAV paths/start milliseconds, and optional music. |
+
+[`examples/clip-manifest.json`](../examples/clip-manifest.json) and
+[`examples/mix-manifest.json`](../examples/mix-manifest.json) show the
+unmodified media-tool formats. Keeping the contract separate avoids coupling
+editorial review data to clip trimming or audio composition mechanics.
+
 ## Approval-gated production flow
 
 1. Draft the storyboard and claim-evidence manifest. Review the chapter
@@ -108,7 +124,8 @@ The validator uses a deliberately limited deterministic strategy:
 
 - checks required manifest fields, timing, IDs, declared marker coverage, and
   evidence-file existence;
-- can confirm that frame extraction produced a claim frame for each scene;
+- can confirm that a non-dry-run frame index produced an existing claim frame
+  for each scene;
 - does **not** OCR pixels or infer product behavior from images.
 
 Declare a marker only after a reviewer can point to it in the referenced frame.
@@ -120,21 +137,24 @@ During storyboard review, placeholder evidence files are normal:
 
 ```powershell
 python .\scripts\validate_claim_evidence.py `
-  .\examples\claim-evidence-manifest.json --allow-missing-files
+  .\claim-evidence.json --allow-missing-files
 python .\scripts\validate_continuity.py `
-  .\examples\claim-evidence-manifest.json
+  .\claim-evidence.json
 python .\scripts\check_narration_gaps.py `
-  .\examples\claim-evidence-manifest.json --minimum-gap 0.8
+  .\claim-evidence.json --minimum-gap 0.8
 ```
 
 After the silent cut exists, use real frame paths, extract review frames, then
 validate file presence and frame-index coverage:
 
 ```powershell
-python .\scripts\extract_scene_qc.py .\manifest.json .\qc
-python .\scripts\validate_claim_evidence.py .\manifest.json `
+python .\scripts\extract_scene_qc.py .\claim-evidence.json .\qc
+python .\scripts\validate_claim_evidence.py .\claim-evidence.json `
   --frame-index .\qc\index.json
 ```
+
+`extract_scene_qc.py --dry-run` is useful to review planned timestamps, but its
+index is intentionally not accepted as final frame evidence.
 
 Read [`editorial-qc.md`](editorial-qc.md) for every QA script, its JSON output,
 and safety boundaries.

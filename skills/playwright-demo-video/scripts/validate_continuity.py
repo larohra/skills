@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -13,7 +14,15 @@ from editorial_common import (
     iter_manifest_scenes,
     load_json,
     require_mapping,
+    require_number,
 )
+
+@dataclass(frozen=True)
+class EvidenceRecord:
+    evidence_shot_id: str | None
+    timestamp_seconds: float | None
+    identity: tuple[str, str] | None
+    aliases: dict[str, str]
 
 
 def _identifier(
@@ -56,27 +65,64 @@ def _aliases(
     return aliases
 
 
+def _evidence_timestamps(
+    scene: dict[str, Any], field: str, errors: list[dict[str, str]]
+) -> dict[str, float]:
+    raw_shots = scene.get("evidence_shots")
+    if not isinstance(raw_shots, list):
+        errors.append({"path": f"{field}.evidence_shots", "message": "must be an array"})
+        return {}
+    timestamps: dict[str, float] = {}
+    for index, raw_shot in enumerate(raw_shots):
+        shot_path = f"{field}.evidence_shots[{index}]"
+        if not isinstance(raw_shot, dict):
+            errors.append({"path": shot_path, "message": "must be an object"})
+            continue
+        shot_id = raw_shot.get("id")
+        if not isinstance(shot_id, str) or not shot_id:
+            errors.append({"path": f"{shot_path}.id", "message": "must be a non-empty string"})
+            continue
+        if shot_id in timestamps:
+            errors.append({"path": f"{shot_path}.id", "message": "must be unique"})
+            continue
+        try:
+            timestamps[shot_id] = require_number(
+                raw_shot.get("timestamp_seconds"), f"{shot_path}.timestamp_seconds"
+            )
+        except EditorialInputError as error:
+            errors.append({"path": f"{shot_path}.timestamp_seconds", "message": str(error)})
+    return timestamps
+
+
 def _record(
-    value: Any, field: str, evidence_ids: set[str], errors: list[dict[str, str]]
-) -> tuple[tuple[str, str] | None, dict[str, str]]:
+    value: Any, field: str, evidence_timestamps: dict[str, float], errors: list[dict[str, str]]
+) -> EvidenceRecord:
     if not isinstance(value, dict):
         errors.append({"path": field, "message": "must be a before/after evidence record"})
-        return None, {}
+        return EvidenceRecord(None, None, None, {})
     evidence_shot_id = value.get("evidence_shot_id")
     if not isinstance(evidence_shot_id, str) or not evidence_shot_id:
         errors.append(
             {"path": f"{field}.evidence_shot_id", "message": "must name an evidence shot"}
         )
-    elif evidence_shot_id not in evidence_ids:
+        valid_shot_id = None
+    elif evidence_shot_id not in evidence_timestamps:
         errors.append(
             {
                 "path": f"{field}.evidence_shot_id",
                 "message": f"does not match a declared evidence_shots id: {evidence_shot_id}",
             }
         )
-    return (
-        _identifier(value.get("identity"), f"{field}.identity", errors),
-        _aliases(value.get("aliases"), f"{field}.aliases", errors),
+        valid_shot_id = None
+    else:
+        valid_shot_id = evidence_shot_id
+    return EvidenceRecord(
+        evidence_shot_id=valid_shot_id,
+        timestamp_seconds=(
+            evidence_timestamps[valid_shot_id] if valid_shot_id is not None else None
+        ),
+        identity=_identifier(value.get("identity"), f"{field}.identity", errors),
+        aliases=_aliases(value.get("aliases"), f"{field}.aliases", errors),
     )
 
 
@@ -111,44 +157,70 @@ def validate_continuity(document: dict[str, Any]) -> dict[str, Any]:
                 }
             )
             continue
-        evidence_ids = {
-            shot.get("id")
-            for shot in scene.get("evidence_shots", [])
-            if isinstance(shot, dict) and isinstance(shot.get("id"), str)
-        }
+        evidence_timestamps = _evidence_timestamps(scene, scene_path, errors)
         expected_identity = _identifier(
             continuity.get("expected_identity"),
             f"{scene_path}.continuity.expected_identity",
             errors,
         )
-        before_identity, before_aliases = _record(
+        before = _record(
             continuity.get("before"),
             f"{scene_path}.continuity.before",
-            evidence_ids,
+            evidence_timestamps,
             errors,
         )
-        after_identity, after_aliases = _record(
+        after = _record(
             continuity.get("after"),
             f"{scene_path}.continuity.after",
-            evidence_ids,
+            evidence_timestamps,
             errors,
         )
 
-        if before_identity is not None and after_identity is not None:
-            if before_identity != after_identity:
+        if (
+            before.evidence_shot_id is not None
+            and after.evidence_shot_id is not None
+        ):
+            if before.evidence_shot_id == after.evidence_shot_id:
+                errors.append(
+                    {
+                        "path": f"{scene_path}.continuity",
+                        "message": (
+                            "before and after must cite distinct evidence shots; one frame "
+                            "cannot establish a lifecycle transition"
+                        ),
+                    }
+                )
+            elif (
+                before.timestamp_seconds is not None
+                and after.timestamp_seconds is not None
+                and before.timestamp_seconds >= after.timestamp_seconds
+            ):
+                errors.append(
+                    {
+                        "path": f"{scene_path}.continuity",
+                        "message": (
+                            "before evidence must precede after evidence: "
+                            f"{before.evidence_shot_id} at {before.timestamp_seconds:.3f}s, "
+                            f"{after.evidence_shot_id} at {after.timestamp_seconds:.3f}s"
+                        ),
+                    }
+                )
+
+        if before.identity is not None and after.identity is not None:
+            if before.identity != after.identity:
                 errors.append(
                     {
                         "path": f"{scene_path}.continuity",
                         "message": (
                             "identity continuity failed: before "
-                            f"{before_identity[0]}={before_identity[1]!r}, after "
-                            f"{after_identity[0]}={after_identity[1]!r}. "
+                            f"{before.identity[0]}={before.identity[1]!r}, after "
+                            f"{after.identity[0]}={after.identity[1]!r}. "
                             "Aliases cannot substitute for the lifecycle identity."
                         ),
                     }
                 )
         if expected_identity is not None:
-            for label, actual in (("before", before_identity), ("after", after_identity)):
+            for label, actual in (("before", before.identity), ("after", after.identity)):
                 if actual is not None and actual != expected_identity:
                     errors.append(
                         {
@@ -193,8 +265,8 @@ def validate_continuity(document: dict[str, Any]) -> dict[str, Any]:
                 )
                 continue
             for label, aliases, expected_value in (
-                ("before", before_aliases, expected_before),
-                ("after", after_aliases, expected_after),
+                ("before", before.aliases, expected_before),
+                ("after", after.aliases, expected_after),
             ):
                 actual_value = aliases.get(name)
                 if actual_value != expected_value:

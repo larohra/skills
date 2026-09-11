@@ -18,10 +18,8 @@ from editorial_common import (
     iter_manifest_scenes,
     load_json,
     normalize_marker,
-    require_list,
     require_mapping,
     require_number,
-    require_string,
     resolve_from,
 )
 
@@ -74,6 +72,7 @@ def validate_manifest(
     min_completion_hold: float,
     max_completion_hold: float,
     frame_index: dict[str, Any] | None = None,
+    frame_index_base: Path | None = None,
 ) -> dict[str, Any]:
     """Return a JSON-ready report for a claim-evidence manifest."""
     errors: list[dict[str, str]] = []
@@ -92,14 +91,41 @@ def validate_manifest(
         has_required_string(video.get("source"), "video.source", errors)
 
     if frame_index is not None:
+        index_base = frame_index_base or base
+        index_is_extracted = frame_index.get("dry_run") is False
+        if not index_is_extracted:
+            add_issue(
+                errors,
+                "frame_index.dry_run",
+                "must be false for final evidence validation; a dry-run index has no frames",
+            )
         raw_frames = frame_index.get("frames")
         if not isinstance(raw_frames, list):
             add_issue(errors, "frame_index.frames", "must be an array")
         else:
-            for item in raw_frames:
-                if isinstance(item, dict) and item.get("kind") == "claim":
+            for frame_index_position, item in enumerate(raw_frames):
+                frame_path = f"frame_index.frames[{frame_index_position}]"
+                if not isinstance(item, dict):
+                    add_issue(errors, frame_path, "must be an object")
+                    continue
+                filename = item.get("file")
+                file_is_present = False
+                if index_is_extracted:
+                    if not isinstance(filename, str) or not filename.strip():
+                        add_issue(errors, f"{frame_path}.file", "must name an extracted frame")
+                    else:
+                        extracted_frame = resolve_from(index_base, filename)
+                        if not extracted_frame.is_file():
+                            add_issue(
+                                errors,
+                                f"{frame_path}.file",
+                                f"credited extracted frame does not exist: {extracted_frame}",
+                            )
+                        else:
+                            file_is_present = True
+                if item.get("kind") == "claim":
                     scene_id = item.get("scene_id")
-                    if isinstance(scene_id, str):
+                    if index_is_extracted and file_is_present and isinstance(scene_id, str):
                         indexed_claim_scenes.add(scene_id)
 
     try:
@@ -397,10 +423,9 @@ def validate_manifest(
 
         if frame_index is not None and scene_id is not None and scene_id not in indexed_claim_scenes:
             add_issue(
-                warnings,
+                errors,
                 scene_path,
-                "no claim timestamp frame appears in the supplied frame index",
-                "warning",
+                "no existing extracted claim timestamp frame appears in the supplied frame index",
             )
 
     return {
@@ -464,6 +489,7 @@ def main() -> None:
         min_completion_hold=args.min_completion_hold,
         max_completion_hold=args.max_completion_hold,
         frame_index=frame_index,
+        frame_index_base=args.frame_index.parent if args.frame_index is not None else None,
     )
     report["manifest"] = str(args.manifest)
     emit_json(report, args.output)

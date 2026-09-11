@@ -6,29 +6,45 @@ watching the demo. Run `python .\scripts\<name>.py --help` for the current
 arguments and write all generated files outside the repository with the raw
 media.
 
-The Python QA tools are cross-platform when Python and (for video operations)
-FFmpeg/FFprobe are on `PATH`. Examples use Windows PowerShell because the
+The Python QA tools are cross-platform when Python 3.9+ and (for video
+operations) FFmpeg/FFprobe are on `PATH`. Examples use Windows PowerShell because the
 existing narration/prerequisite workflow is Windows-oriented; on macOS/Linux,
 use the same arguments with forward-slash paths and the local Python command.
+
+## Keep media and editorial inputs separate
+
+`claim-evidence.json` drives only the new editorial validators and frame
+extractor. The existing `stitch_clips.py` and `mix_audio_overlays.py` retain
+their separate inputs, respectively `clips.json` and `mix.json`; examples for
+both live in `examples/`. The claim contract's `video.source` must point to the
+silent master produced from `clips.json`, never to the raw-clip or mix manifest
+itself.
 
 ## Typical final-QC sequence
 
 ```powershell
+# Use the existing media manifests first. Do not pass claim-evidence.json here.
+python .\scripts\stitch_clips.py .\clips.json .\deliverables\demo-silent-v1.mp4
+# Set claim-evidence.json video.source to the silent master above.
+
 # Validate the plan before capture. Placeholder frames are acceptable here.
-python .\scripts\validate_claim_evidence.py .\manifest.json --allow-missing-files
-python .\scripts\validate_continuity.py .\manifest.json
+python .\scripts\validate_claim_evidence.py .\claim-evidence.json --allow-missing-files
+python .\scripts\validate_continuity.py .\claim-evidence.json
 
 # Confirm actual telemetry vocabulary before writing trace narration.
 python .\scripts\inventory_trace_spans.py .\sanitized-trace-export.json `
   --expect-span "demo.request" --expect-dependency-type HTTP
 
 # After cutting the silent master, inspect every planned proof point.
-python .\scripts\extract_scene_qc.py .\manifest.json .\qc
-python .\scripts\validate_claim_evidence.py .\manifest.json `
+python .\scripts\extract_scene_qc.py .\claim-evidence.json .\qc
+python .\scripts\validate_claim_evidence.py .\claim-evidence.json `
   --frame-index .\qc\index.json
-python .\scripts\check_narration_gaps.py .\manifest.json --minimum-gap 0.8
+python .\scripts\check_narration_gaps.py .\claim-evidence.json --minimum-gap 0.8
 python .\scripts\detect_static_waits.py .\deliverables\demo-v1.mp4 `
   --output .\qc\static-waits.json
+
+# After timing/narration approval, use the existing mix input format.
+python .\scripts\mix_audio_overlays.py .\mix.json
 
 # Review the promotion preview before making the delivery aliases.
 python .\scripts\promote_versioned_artifacts.py .\promotion-plan.json `
@@ -47,8 +63,8 @@ Use `--dry-run` to review planned timestamps without running FFmpeg.
 
 | Tool | Input | Output and failure behavior |
 | --- | --- | --- |
-| `validate_claim_evidence.py` | Claim-evidence manifest; optional frame index | JSON report with missing fields, files, marker declarations, and completion-hold violations. Fails for invalid/missing required evidence; warns for overlong holds or missing optional index coverage. |
-| `validate_continuity.py` | Claim-evidence manifest | JSON report that checks durable identity separately from declared aliases. Fails for identity/alias mismatches or unknown linked evidence-shot IDs. |
+| `validate_claim_evidence.py` | `claim-evidence.json`; optional final frame index | JSON report with missing fields, files, marker declarations, and completion-hold violations. A supplied index must be non-dry-run and every credited frame must exist. |
+| `validate_continuity.py` | `claim-evidence.json` | JSON report that checks durable identity separately from declared aliases. Fails for identity/alias mismatches, unknown linked evidence-shot IDs, reused before/after frames, or reverse evidence timing. |
 | `check_narration_gaps.py` | `narration_schedule` JSON or scene narration in the manifest | JSON schedule ordered by time plus overlap and minimum-gap diagnostics. Nonzero exit for every overlap or short gap; default minimum is 0.8 seconds. |
 
 The example manifest documents the shared schema. A standalone retimed schedule
@@ -148,17 +164,20 @@ The script is dry-run by default. With `--apply`, it:
 1. validates every source and alias before changes;
 2. moves only an existing, explicitly named alias to
    `archive/<version>/previous/`;
-3. copies each explicit versioned source to its alias;
+3. copies each explicit versioned source to its alias without overwriting;
 4. verifies source and alias SHA-256 values;
 5. writes `promotion-<version>.manifest.json` and
    `checksums-<version>.sha256`.
 
-It rejects absolute paths, parent traversal, symlinks, duplicate names,
-filesystem roots, existing metadata/archive targets, unversioned source names,
-and browser/authentication-sensitive path components. It does not scan,
-delete, overwrite, or touch profile directories, storage state, cookies,
-credentials, tokens, or arbitrary paths. Review the JSON preview before
-passing `--apply`.
+It rejects absolute paths, parent traversal, symlinks (including nested archive
+descendants), duplicate names, filesystem roots, existing metadata/archive
+targets, unversioned source names, and browser/authentication-sensitive path
+components. If a later named artifact or metadata write fails, it rolls back
+the named aliases/archive entries it created rather than leaving a mixed
+release; a concurrent external edit that prevents safe rollback is reported
+explicitly. It does not scan, overwrite, or touch profile directories, storage
+state, cookies, credentials, tokens, or paths outside the explicit delivery
+directory. Review the JSON preview before passing `--apply`.
 
 ## JSON reports
 

@@ -16,13 +16,13 @@ viewer can see.
    - Run `scripts/check_prereqs.ps1`.
    - Prefer `uv run --with playwright python ...` instead of adding Playwright
      to the repository.
-   - The QA scripts use Python's standard library; frame/video checks also need
-     FFmpeg and FFprobe.
+   - The QA scripts use Python 3.9+ standard library features; frame/video
+     checks also need FFmpeg and FFprobe.
    - Use installed Chrome; Playwright video works in headless mode when the
      authentication flow has been verified there.
 
 2. **Approve the visual argument before capture**
-   - Draft the claim-evidence manifest. Give each chapter one capability and
+   - Draft `claim-evidence.json`. Give each chapter one capability and
      materially distinct user value; its scenes may form one coherent proof
      across UI, telemetry, and cloud surfaces.
    - Give each scene one narrow claim, exact proof frames/markers, expected
@@ -67,10 +67,13 @@ viewer can see.
    - Keep the approved lock current and release it explicitly when capture ends.
 
 6. **Review a silent rough cut**
-   - Stitch with `python scripts/stitch_clips.py manifest.json output.mp4` and
-     preserve the raw/original master.
+   - Keep the existing clip manifest separate from the claim contract:
+     `python scripts/stitch_clips.py clips.json deliverables/silent-master.mp4`.
+     Set `claim-evidence.json`'s `video.source` to that silent master and
+     preserve it as the raw/original master.
    - Extract scene midpoints, claim timestamps, evidence frames, and transition
-     frames with `python scripts/extract_scene_qc.py manifest.json qc`.
+     frames with
+     `python scripts/extract_scene_qc.py claim-evidence.json qc`.
    - Inspect the silent proof chain. Fix the capture or structure before
      narration; do not produce final audio or render before that review is
      approved.
@@ -78,7 +81,7 @@ viewer can see.
 7. **Preview timing and narration**
    - Generate narration with `scripts/generate_narration.ps1` and schedule
      speech with at least 0.8 seconds of breathing room:
-     `python scripts/check_narration_gaps.py manifest.json`.
+     `python scripts/check_narration_gaps.py claim-evidence.json`.
    - Narrate capability claims, not clicks. If a narration claim cannot point to
      a visible frame, fix the capture, revise the narration, or remove it.
      Never claim invisible telemetry or unseen surfaces.
@@ -91,8 +94,8 @@ viewer can see.
      `python scripts/generate_ambient_bed.py`.
    - Build transparent highlight PNGs and apply them only during relevant time
      windows.
-   - Mix audio/overlays with
-     `python scripts/mix_audio_overlays.py manifest.json`.
+   - Keep the existing mix manifest separate from the claim contract and mix
+     audio/overlays with `python scripts/mix_audio_overlays.py mix.json`.
    - Read [references/editing-and-audio.md](references/editing-and-audio.md).
 
 9. **Run final QC and promote**
@@ -129,7 +132,7 @@ viewer can see.
 
 ## Resources
 
-- `scripts/check_prereqs.ps1` — validate Chrome, FFmpeg, FFprobe, Python, uv,
+- `scripts/check_prereqs.ps1` — validate Chrome, FFmpeg, FFprobe, Python 3.9+, uv,
   and SAPI voices.
 - `scripts/open_persistent_browser.py` — create or reopen a dedicated Chrome or
   Edge profile for interactive SSO.
@@ -157,3 +160,6 @@ viewer can see.
   and manifest template.
 - `references/editorial-qc.md` — QC commands, JSON reports, and safety limits.
 - `references/storyboarding.md` — concise chapter and scene orientation.
+- `examples/clip-manifest.json` — existing `stitch_clips.py` input template.
+- `examples/mix-manifest.json` — existing `mix_audio_overlays.py` input template.
+- `examples/claim-evidence-manifest.json` — editorial contract template.

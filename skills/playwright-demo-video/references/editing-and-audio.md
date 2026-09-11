@@ -6,6 +6,12 @@ Never overwrite the silent master. Produce `demo.mp4` and
 `demo-enhanced.mp4`. Insert chapters by splitting and concatenating the master;
 do not re-record completed browser scenes.
 
+Keep the media mix input separate from the editorial claim-evidence contract:
+`mix_audio_overlays.py` consumes its existing `source`/`output`/overlay/audio
+JSON shape. Start from
+[`examples/mix-manifest.json`](../examples/mix-manifest.json), not
+`claim-evidence.json`.
+
 ## Narration
 
 On Windows, use `System.Speech.Synthesis.SpeechSynthesizer`. Microsoft Mark is a
