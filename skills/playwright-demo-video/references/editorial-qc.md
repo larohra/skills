@@ -16,16 +16,19 @@ use the same arguments with forward-slash paths and the local Python command.
 `claim-evidence.json` drives only the new editorial validators and frame
 extractor. The existing `stitch_clips.py` and `mix_audio_overlays.py` retain
 their separate inputs, respectively `clips.json` and `mix.json`; examples for
-both live in `examples/`. The claim contract's `video.source` must point to the
-silent master produced from `clips.json`, never to the raw-clip or mix manifest
-itself.
+both live in `examples/`. By default, the claim contract's `video.source`
+points to the intended delivery candidate or another existing reviewable cut.
+Point it to a silent master only when the user requested that separate
+artifact; never point it to a raw-clip or mix manifest itself.
 
 ## Typical final-QC sequence
 
 ```powershell
-# Use the existing media manifests first. Do not pass claim-evidence.json here.
-python .\scripts\stitch_clips.py .\clips.json .\deliverables\demo-silent-v1.mp4
-# Set claim-evidence.json video.source to the silent master above.
+# Only when the user explicitly requests a silent master, use the existing
+# clip manifest. Do not pass claim-evidence.json to stitch_clips.py.
+# python .\scripts\stitch_clips.py .\clips.json .\deliverables\demo-silent-v1.mp4
+# Otherwise do not create this file; set claim-evidence.json video.source to
+# the intended delivery candidate or another existing reviewable cut.
 
 # Validate the plan before capture. Placeholder frames are acceptable here.
 python .\scripts\validate_claim_evidence.py .\claim-evidence.json --allow-missing-files
@@ -35,7 +38,7 @@ python .\scripts\validate_continuity.py .\claim-evidence.json
 python .\scripts\inventory_trace_spans.py .\sanitized-trace-export.json `
   --expect-span "demo.request" --expect-dependency-type HTTP
 
-# After cutting the silent master, inspect every planned proof point.
+# Inspect every planned proof point from the approved review source.
 python .\scripts\extract_scene_qc.py .\claim-evidence.json .\qc
 python .\scripts\validate_claim_evidence.py .\claim-evidence.json `
   --frame-index .\qc\index.json

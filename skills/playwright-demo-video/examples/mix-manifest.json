@@ -1,5 +1,5 @@
 {
-  "source": "deliverables/leadership-demo-silent-v1.mp4",
+  "source": "deliverables/leadership-demo-review-v1.mp4",
   "output": "deliverables/leadership-demo-v1.mp4",
   "crf": 20,
   "overlays": [

@@ -66,15 +66,20 @@ viewer can see.
    - Add unobtrusive scene badges in DOM for narrative continuity.
    - Keep the approved lock current and release it explicitly when capture ends.
 
-6. **Review a silent rough cut**
-   - Keep the existing clip manifest separate from the claim contract:
-     `python scripts/stitch_clips.py clips.json deliverables/silent-master.mp4`.
-     Set `claim-evidence.json`'s `video.source` to that silent master and
-     preserve it as the raw/original master.
+6. **Review the visual rough cut**
+   - Do not create a separate silent video by default. Create and preserve a
+     silent rough cut only when the user explicitly requests a silent master or
+     a separate visual-approval artifact.
+   - When requested, keep the existing clip manifest separate from the claim
+     contract: `python scripts/stitch_clips.py clips.json
+     deliverables/silent-master.mp4`. Otherwise, use the intended delivery
+     candidate or another existing reviewable cut.
+   - Set `claim-evidence.json`'s `video.source` to the actual review source:
+     either the user-requested silent master or the existing candidate.
    - Extract scene midpoints, claim timestamps, evidence frames, and transition
      frames with
      `python scripts/extract_scene_qc.py claim-evidence.json qc`.
-   - Inspect the silent proof chain. Fix the capture or structure before
+   - Inspect the visual proof chain. Fix the capture or structure before
      narration; do not produce final audio or render before that review is
      approved.
 
@@ -128,7 +133,8 @@ viewer can see.
   integrations.
 - Do not narrate what a reviewer cannot point to in a visible frame.
 - Keep music beneath narration. Aim near `-24 dB` mean and below `-2 dB` peak.
-- Preserve a silent original and create a separate enhanced output.
+- Preserve a user-requested silent master; otherwise preserve the approved
+  source/delivery candidate and do not create a silent video solely by default.
 
 ## Resources
 

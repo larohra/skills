@@ -43,6 +43,8 @@ complete.
 5. Lifecycle: before state, action, after state, and durable identity proof.
 6. Closing: a measured comparison or concise value proposition.
 
-Produce the silent rough cut before narration. Once the reviewer approves the
+Review the visual rough cut before narration. Create a separate silent rough
+cut only when the user requested it; otherwise use the intended delivery
+candidate or another existing reviewable cut. Once the reviewer approves the
 visual argument, preview timing/narration, then make the final mix and run
 claim/transition/midpoint QC.

@@ -1,8 +1,9 @@
 # Claim-evidence manifest
 
-Use a claim-evidence manifest before capture and keep it alongside the silent
-rough cut. It turns a demo from a sequence of plausible clicks into a reviewable
-argument: every narrated statement has a planned, readable visual proof.
+Use a claim-evidence manifest before capture and keep it alongside the
+reviewable cut. It turns a demo from a sequence of plausible clicks into a
+reviewable argument: every narrated statement has a planned, readable visual
+proof. Do not create a separate silent rough cut unless the user asks for one.
 
 The reusable example is
 [`examples/claim-evidence-manifest.json`](../examples/claim-evidence-manifest.json).
@@ -37,7 +38,7 @@ existing media-processing inputs. Keep three explicitly named JSON documents:
 
 | File | Consumed by | Purpose |
 | --- | --- | --- |
-| `claim-evidence.json` | The new validation/QC scripts | Chapters, claims, evidence frames, narration timing, and continuity. Its `video.source` names the completed silent master. |
+| `claim-evidence.json` | The new validation/QC scripts | Chapters, claims, evidence frames, narration timing, and continuity. Its `video.source` names the review source: the delivery candidate by default, or a user-requested silent master. |
 | `clips.json` | `stitch_clips.py` | Existing top-level `scenes` list with raw clip `path`, `start`, and `duration`. |
 | `mix.json` | `mix_audio_overlays.py` | Existing `source`, `output`, overlays, narration WAV paths/start milliseconds, and optional music. |
 
@@ -51,12 +52,15 @@ editorial review data to clip trimming or audio composition mechanics.
 1. Draft the storyboard and claim-evidence manifest. Review the chapter
    uniqueness rationale, evidence chain, continuity records, and fallbacks.
    Obtain approval before capture.
-2. Cut a **silent rough cut** and extract planned proof frames. Review whether
-   the visual argument works without narration.
+2. Review the visual rough cut and extract planned proof frames. Create a
+   separate silent rough cut only when the user requests a silent master or a
+   visual-approval artifact; otherwise review the intended delivery candidate
+   or an existing reviewable cut.
 3. Add timings and make a narration preview. Check gaps and ensure spoken
    claims land on their evidence. Obtain approval before final audio or final
    rendering.
-4. Produce the final mix from the preserved silent master.
+4. Produce the final mix from the approved review source (or the preserved
+   silent master when one was requested).
 5. Run final QC, inspect the proof frames, and promote the versioned delivery.
 
 This gate prevents expensive audio and rendering work from locking in an
@@ -65,12 +69,12 @@ add process when the demo is small.
 
 ## Required shape
 
-All timeline values are seconds in the final silent-master timeline, not
+All timeline values are seconds in the approved review-source timeline, not
 wall-clock timestamps.
 
 | Level | Required fields | Meaning |
 | --- | --- | --- |
-| Top level | `schema_version`, `video`, `chapters` | `video.source` is the silent master used by frame extraction. |
+| Top level | `schema_version`, `video`, `chapters` | `video.source` is the approved review source used by frame extraction; it is silent only when the user requested a silent master. |
 | Chapter | `id`, `capability`, `user_value`, `distinct_value_from_prior`, `scenes` | State why its value differs from earlier material, including the first chapter. |
 | Scene | `id`, `claim`, `timeline`, `evidence_shots`, `required_visible_markers`, `expected_result`, `correlation_ids`, `narration`, `fallback` | One scene makes one related claim. Set `correlation_ids` to `[]` only with a `correlation_rationale`. |
 | Evidence shot | `id`, `file`, `timestamp_seconds`, `role`, `visible_markers`, `hold_start_seconds`, `hold_end_seconds` | `file` is an exact capture or extracted proof frame. `role` is `context`, `action`, `outcome`, `response`, `status`, or `telemetry`. |
@@ -144,8 +148,8 @@ python .\scripts\check_narration_gaps.py `
   .\claim-evidence.json --minimum-gap 0.8
 ```
 
-After the silent cut exists, use real frame paths, extract review frames, then
-validate file presence and frame-index coverage:
+After the approved review source exists, use real frame paths, extract review
+frames, then validate file presence and frame-index coverage:
 
 ```powershell
 python .\scripts\extract_scene_qc.py .\claim-evidence.json .\qc
