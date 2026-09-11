@@ -2,9 +2,17 @@
 
 ## Preserve the original
 
-Never overwrite the silent master. Produce `demo.mp4` and
-`demo-enhanced.mp4`. Insert chapters by splitting and concatenating the master;
-do not re-record completed browser scenes.
+When the user requests a silent master, never overwrite it; produce
+`demo.mp4` and `demo-enhanced.mp4` separately. Otherwise preserve the approved
+source/delivery candidate and do not create a silent video merely because this
+workflow mentions one. Insert chapters by splitting and concatenating the
+existing master/candidate; do not re-record completed browser scenes.
+
+Keep the media mix input separate from the editorial claim-evidence contract:
+`mix_audio_overlays.py` consumes its existing `source`/`output`/overlay/audio
+JSON shape. Start from
+[`examples/mix-manifest.json`](../examples/mix-manifest.json), not
+`claim-evidence.json`.
 
 ## Narration
 
@@ -15,7 +23,12 @@ clear technical default; Zira is a good alternative.
 - Measure every WAV with `ffprobe`.
 - Schedule starts so speech does not overlap.
 - Narrate capability claims, not every click.
-- Keep sentences short enough for the visible scene.
+- Keep sentences short enough for the visible scene and use
+  `check_narration_gaps.py` to leave at least 0.8 seconds by default.
+- Do not finalize audio before visual claim-evidence review is approved. That
+  review can use the intended delivery candidate; use a silent rough cut only
+  when the user requested one. If a narration claim cannot be located in a
+  visible frame, revise it or repair the capture.
 
 ## Background music
 
@@ -55,6 +68,8 @@ start, overlay window, storyboard timestamp, and chapter marker by `D`.
 ## Review
 
 - Generate a contact sheet every 10–20 seconds.
-- Inspect specific frames around every overlay.
+- Inspect specific frames around every overlay, plus each declared claim,
+  scene midpoint, and both sides of every transition.
 - Verify codecs/sample rate/duration with `ffprobe`.
 - Open the enhanced MP4 in a browser/video canvas for user review.
+- Read [editorial-qc.md](editorial-qc.md) for the reusable JSON-backed checks.

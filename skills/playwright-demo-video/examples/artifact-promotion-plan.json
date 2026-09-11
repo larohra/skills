@@ -1,0 +1,14 @@
+{
+  "version": "v2",
+  "archive_dir": "archive",
+  "artifacts": [
+    {
+      "source": "leadership-demo-v2.mp4",
+      "alias": "leadership-demo-latest.mp4"
+    },
+    {
+      "source": "leadership-demo-v2.manifest.json",
+      "alias": "leadership-demo-latest.manifest.json"
+    }
+  ]
+}

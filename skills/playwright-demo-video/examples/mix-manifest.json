@@ -1,0 +1,27 @@
+{
+  "source": "deliverables/leadership-demo-review-v1.mp4",
+  "output": "deliverables/leadership-demo-v1.mp4",
+  "crf": 20,
+  "overlays": [
+    {
+      "path": "overlays/session-id.png",
+      "windows": [
+        [
+          20.5,
+          24.0
+        ]
+      ]
+    }
+  ],
+  "narration": [
+    {
+      "path": "narration/request-completed.wav",
+      "start_ms": 10500,
+      "volume": 1.15
+    }
+  ],
+  "music": {
+    "path": "audio/ambient-bed.wav",
+    "volume": 0.2
+  }
+}

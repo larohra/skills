@@ -1,0 +1,192 @@
+{
+  "schema_version": "1.0",
+  "video": {
+    "source": "deliverables/leadership-demo-v1.mp4"
+  },
+  "chapters": [
+    {
+      "id": "request-outcome",
+      "capability": "Visible request outcome",
+      "user_value": "A user can see a completed request and retain a correlation ID for follow-up.",
+      "distinct_value_from_prior": "The opening chapter establishes the immediate user-visible outcome before any lifecycle behavior.",
+      "scenes": [
+        {
+          "id": "request-completed",
+          "claim": "The request completes with a readable response and a reusable request identifier.",
+          "timeline": {
+            "start_seconds": 0.0,
+            "end_seconds": 14.0
+          },
+          "required_visible_markers": [
+            "Response ready",
+            "request-demo-001"
+          ],
+          "expected_result": "The response is shown with status Complete and request-demo-001.",
+          "correlation_ids": [
+            {
+              "name": "request_id",
+              "value": "request-demo-001",
+              "surfaces": [
+                "browser response",
+                "trace search"
+              ]
+            }
+          ],
+          "evidence_shots": [
+            {
+              "id": "request-action",
+              "file": "qc/request-action.png",
+              "timestamp_seconds": 3.0,
+              "role": "action",
+              "visible_markers": [
+                "Send request",
+                "request-demo-001"
+              ],
+              "hold_start_seconds": 2.5,
+              "hold_end_seconds": 3.5
+            },
+            {
+              "id": "request-response",
+              "file": "qc/request-response.png",
+              "timestamp_seconds": 9.5,
+              "role": "response",
+              "visible_markers": [
+                "Response ready",
+                "request-demo-001"
+              ],
+              "hold_start_seconds": 6.5,
+              "hold_end_seconds": 10.0
+            }
+          ],
+          "narration": {
+            "claim": "The response is complete, and the request ID remains available for support and tracing.",
+            "start_seconds": 10.5,
+            "end_seconds": 13.3,
+            "claim_timestamp_seconds": 10.5,
+            "visible_hold_seconds": 3.5,
+            "asserts_completion": true
+          },
+          "fallback": "Use a labeled response card only if the approved browser response cannot be captured."
+        }
+      ]
+    },
+    {
+      "id": "durable-resume",
+      "capability": "Durable lifecycle resume",
+      "user_value": "A paused session resumes while preserving its durable identity.",
+      "distinct_value_from_prior": "Unlike the request outcome, this chapter proves continuity across an idle-to-complete lifecycle rather than a single response.",
+      "scenes": [
+        {
+          "id": "session-resumes",
+          "claim": "The same durable session completes after being resumed from an idle state.",
+          "timeline": {
+            "start_seconds": 14.0,
+            "end_seconds": 30.0
+          },
+          "required_visible_markers": [
+            "session-demo-001",
+            "Status: Complete"
+          ],
+          "expected_result": "session-demo-001 is visible before resume and after completion.",
+          "correlation_ids": [
+            {
+              "name": "session_id",
+              "value": "session-demo-001",
+              "surfaces": [
+                "runtime status",
+                "telemetry"
+              ]
+            }
+          ],
+          "lifecycle_claim": true,
+          "continuity": {
+            "expected_identity": {
+              "name": "session_id",
+              "value": "session-demo-001"
+            },
+            "before": {
+              "evidence_shot_id": "idle-before",
+              "identity": {
+                "name": "session_id",
+                "value": "session-demo-001"
+              },
+              "aliases": [
+                {
+                  "name": "generation",
+                  "value": "generation-1"
+                }
+              ]
+            },
+            "after": {
+              "evidence_shot_id": "complete-after",
+              "identity": {
+                "name": "session_id",
+                "value": "session-demo-001"
+              },
+              "aliases": [
+                {
+                  "name": "generation",
+                  "value": "generation-2"
+                }
+              ]
+            },
+            "expected_aliases": [
+              {
+                "name": "generation",
+                "before": "generation-1",
+                "after": "generation-2"
+              }
+            ]
+          },
+          "evidence_shots": [
+            {
+              "id": "idle-before",
+              "file": "qc/session-idle.png",
+              "timestamp_seconds": 16.0,
+              "role": "status",
+              "visible_markers": [
+                "session-demo-001",
+                "Status: Idle"
+              ],
+              "hold_start_seconds": 15.0,
+              "hold_end_seconds": 17.0
+            },
+            {
+              "id": "complete-after",
+              "file": "qc/session-complete.png",
+              "timestamp_seconds": 24.0,
+              "role": "status",
+              "visible_markers": [
+                "session-demo-001",
+                "Status: Complete"
+              ],
+              "hold_start_seconds": 20.5,
+              "hold_end_seconds": 24.0
+            },
+            {
+              "id": "trace-correlation",
+              "file": "qc/session-trace.png",
+              "timestamp_seconds": 26.0,
+              "role": "telemetry",
+              "visible_markers": [
+                "session-demo-001",
+                "demo.resume"
+              ],
+              "hold_start_seconds": 25.0,
+              "hold_end_seconds": 27.0
+            }
+          ],
+          "narration": {
+            "claim": "The same session identity is visible before resume, after completion, and in the telemetry evidence.",
+            "start_seconds": 24.8,
+            "end_seconds": 29.0,
+            "claim_timestamp_seconds": 24.8,
+            "visible_hold_seconds": 3.5,
+            "asserts_completion": true
+          },
+          "fallback": "Use an honest labeled card that names the unavailable surface; do not imply unseen telemetry."
+        }
+      ]
+    }
+  ]
+}

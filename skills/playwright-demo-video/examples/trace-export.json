@@ -1,0 +1,28 @@
+{
+  "resourceSpans": [
+    {
+      "scopeSpans": [
+        {
+          "spans": [
+            {
+              "traceId": "redacted",
+              "spanId": "redacted",
+              "name": "demo.request"
+            },
+            {
+              "traceId": "redacted",
+              "spanId": "redacted",
+              "name": "demo.resume"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "name": "example-backend",
+      "dependencyType": "HTTP"
+    }
+  ]
+}

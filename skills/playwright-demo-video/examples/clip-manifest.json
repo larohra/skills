@@ -1,0 +1,18 @@
+{
+  "width": 1440,
+  "height": 900,
+  "fps": 30,
+  "crf": 22,
+  "scenes": [
+    {
+      "path": "raw/request-completed.webm",
+      "start": 0.8,
+      "duration": 12.5
+    },
+    {
+      "path": "raw/session-resumes.webm",
+      "start": 1.1,
+      "duration": 15.0
+    }
+  ]
+}
