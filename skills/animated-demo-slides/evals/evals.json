@@ -4,20 +4,170 @@
     {
       "id": 0,
       "prompt": "I'm doing a tech talk next week about database connection pooling and I need to explain the concept to people who aren't super familiar with databases. I want to show: 1) a healthy state where the pool has 50 out of 100 connections busy handling requests with 50 idle, 2) what happens when traffic spikes and the pool becomes saturated (all 100 connections busy), 3) what recovery looks like with proper monitoring in place. Can you create an animated presentation that walks through these states visually? The audience will be mostly engineers and PMs from different teams so it needs to be clear even if someone's English isn't perfect.",
-      "expected_output": "A standalone HTML file with 3-4 animated slides showing the connection pool states, with visual indicators for busy (green), idle (dark), and waiting connections. Each slide should have labels and numbers, with smooth animations between states.",
-      "files": []
+      "expected_output": "One standalone HTML deck showing all requested connection-pool states with visible labels and supplied numbers, finite/replayable explanatory animation, and a readable reduced-motion equivalent.",
+      "files": [],
+      "assertions": [
+        "Creates one HTML deliverable, without automatic alternate formats or public/embedded copies.",
+        "Preserves all requested states and explains busy, idle, and waiting in language understandable without the conversation.",
+        "Uses a meaningful visual state change rather than a wall of prose or decorative motion."
+      ]
     },
     {
       "id": 1,
       "prompt": "I need to explain our API request flow to our design team before we do a major refactor. The flow goes: user request → load balancer → API gateway → microservice → database. I want each component to be visually distinct, and I want to show where latency issues typically occur (mostly at the database layer during peak load). Can you make this into slides that show the request flowing through each component with timing information? We want something we can use in a design review meeting next Friday.",
-      "expected_output": "A multi-slide presentation showing the API request flow, with each component represented visually, showing request path, and highlighting bottleneck areas.",
-      "files": []
+      "expected_output": "One HTML deck showing all request-flow components and the reported bottleneck, with any illustrative timing clearly distinguished from measured results.",
+      "files": [],
+      "assertions": [
+        "Shows every named component and the direction of the request in a useful diagram.",
+        "Does not invent measured latency or convert the reported bottleneck into an unconditional guarantee."
+      ]
     },
     {
       "id": 2,
       "prompt": "We had an incident last night where our cache layer went down and it cascaded into a database overload. I need to create a postmortem presentation showing: 1) normal operation (requests hitting cache, low latency), 2) cache failure moment (requests start missing cache), 3) database gets overwhelmed, 4) alerts fire and on-call team responds, 5) cache restored and things recover. Each slide should show the metric/status changing so people can see cause and effect. This needs to be clear for our all-hands meeting.",
-      "expected_output": "A 5-slide presentation showing the incident timeline with visual state changes, metric transitions, and recovery flow.",
-      "files": []
+      "expected_output": "One HTML deck showing the requested incident sequence with clear cause/effect diagrams and no invented measurements.",
+      "files": [],
+      "assertions": [
+        "Preserves normal operation, failure, overload, response, and recovery in the requested order.",
+        "Uses labels and visible qualifications that an unfamiliar reader can understand."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Make one self-contained HTML presentation called processing-options.html for a local design review. Compare a queue worker, a request-driven service, and a scheduled batch job so someone outside our team can decide which model to investigate. These are proposals, not measured implementations. Use your judgment on layout. Do not publish it or make another format.",
+      "expected_output": "One local HTML deliverable and its reproducible source, with no unnecessary output-contract interview or additional presentation variants.",
+      "files": [],
+      "assertions": [
+        "Acts on the specified format, filename, local sharing scope, and proposal status without asking them again.",
+        "Produces no PPTX, video, published URL, alternate HTML variant, or user-facing QA contact sheet.",
+        "Keeps all three peer alternatives visible and states the comparison question in plain language."
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Let's approve the copy one slide at a time before drawing anything. For the current slide keep the title exactly 'Who retries a failed job?', labels exactly 'Queue worker' and 'Record result', summary exactly 'The retry owner must be specified.', and visible caveat exactly 'Proposed design; recovery behavior has not been demonstrated.' Show me only this slide's copy for approval; don't move on until I agree.",
+      "expected_output": "The exact current slide copy with its qualification, recorded for later generation, and no next slide or generated deck before approval.",
+      "files": [],
+      "assertions": [
+        "Preserves the exact title, labels, summary, and visible qualification.",
+        "Waits for approval of this slide before advancing or generating visuals.",
+        "Does not replace the requested review with a fixed multi-gate intake or word-count target."
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Simplify this comparison without removing options: queue worker, request-driven service, and scheduled batch job are peer alternatives. A single worker and a worker pool are variations of the queue-worker alternative. We currently prefer the queue worker, but the other two still need fair coverage. Keep 'request-driven service' unchanged in all labels and explanations.",
+      "expected_output": "A clearer visual comparison retaining all peers and the actual queue-worker variants, with consistent terminology and no invented hierarchy.",
+      "files": [],
+      "assertions": [
+        "Retains all peer alternatives, including non-preferred ones.",
+        "Treats single worker and worker pool as queue-worker variations without absorbing the other architectures.",
+        "Keeps the approved term consistent in SVG, reader text, notes, legends, and reference labels."
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "I want a slide saying 'A permitted operation is always ready to run.' By permitted we might mean access permission, but the workflow also has state-specific allowed operations. We have not settled which meaning belongs in the comparison. Help me get this claim right before drawing it.",
+      "expected_output": "A focused clarification separating authorization from workflow state, without endorsing the ambiguous universal claim.",
+      "files": [],
+      "assertions": [
+        "Distinguishes permission to call an operation from the operation's availability in a workflow state.",
+        "Asks only the material term question or offers accurately qualified copy for agreement.",
+        "Does not present the ambiguous 'always ready' claim as a fact or production guarantee."
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "In the staged current.html, change only the 'Queue worker design' reference to https://example.org/designs/queue-worker#revised-retries. Update its source reference-deck.json too. The current deck's copy and visuals are approved; preserved.html must remain byte-for-byte unchanged. This is an authorized in-place hyperlink update, not a new presentation.",
+      "expected_output": "Only the named current output and its JSON source change; the new URL works at the diagram, in reader view, and in notes, with no regenerated variants or intake interview.",
+      "files": ["evals/fixtures/reference-deck.json"],
+      "assertions": [
+        "Identifies and updates the actual staged current artifact and reproducible source.",
+        "Changes the reference consistently in the hotspot, visible link list, and notes without altering other URLs or approved copy.",
+        "Preserves preserved.html byte-for-byte and produces no new deck or alternate export.",
+        "Uses native keyboard-accessible references and verifies the actual updated output."
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "Check the bundled generator with the neutral source fixture in an ordinary browser and an iframe whose document is opaque-origin about:srcdoc with a blob base URL. History writes are denied there. Keep slide navigation, skip focus, notes, reader mode, references, and reduced motion usable. Do not add hash navigation or relax host permissions to demonstrate a fix.",
+      "expected_output": "Evidence-backed checks of the current in-memory runtime and relevant access modes, with no needless URL-state subsystem or host-policy bypass.",
+      "files": ["evals/fixtures/reference-deck.json"],
+      "assertions": [
+        "Keeps navigation independent of history or URL writes rather than introducing a hash/history feature.",
+        "Moves skip focus directly without resolving a fragment against the blob base.",
+        "Tests applicable desktop/mobile, notes, reader, keyboard, and motion behavior or explicitly reports unavailable checks.",
+        "Distinguishes simulated embedding from a real portal deployment and does not change security policy."
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "The requested deck has been delivered. Suppose the task exposed a new reproducible keyboard-focus bug in the skill that is not yet documented or covered by an open contribution. Consider a generic upstream fix, but I have not approved any publication. The task happened in an unrelated repository; do not use that as the contribution destination.",
+      "expected_output": "One small sanitized proposal naming the declared skill contribution repository and seeking explicit publication approval, without delaying deck delivery or creating a branch/push/PR yet.",
+      "files": [],
+      "assertions": [
+        "Reflects once after delivery and distinguishes a reusable bug from a task-specific preference.",
+        "Checks for existing guidance or contributions and identifies the declared upstream rather than the task repository.",
+        "Shows the sanitized change and obtains scoped publication approval before any branch, push, issue, or PR.",
+        "Does not modify an installed skill or add presentation callbacks or persistent automation."
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "The deck is complete. The only observations were my preference for warmer colors and a viewer limitation already covered by the skill and an open contribution. I do not want another upstream submission or another prompt about it.",
+      "expected_output": "Completion of the original task with no new contribution, publication prompt, preference mechanism, or repeated reflection.",
+      "files": [],
+      "assertions": [
+        "Treats a personal color preference as task-specific rather than a universal rule.",
+        "Deduplicates the already-covered lesson and respects the declined submission.",
+        "Does not manufacture a PR, keep prompting, or add persistent preference/automation state."
+      ]
+    },
+    {
+      "id": 11,
+      "prompt": "After delivery, we identified a reusable reference-link regression. I explicitly authorize one focused contribution for that bug to the skill's declared contribution repository. The real task contained confidential diagrams, measurements, and local identifiers; none may be published. Use an invented minimal SVG and example.org links instead. Assume repository write tools are unavailable in this evaluation.",
+      "expected_output": "A sanitized minimal proposal using neutral examples, no redundant approval question, and an honest statement that no update was sent because write tools are unavailable.",
+      "files": [],
+      "assertions": [
+        "Recognizes the existing contribution-and-destination approval without asking again.",
+        "Excludes task artifacts, transcripts, private architecture, measurements, credentials, paths, and identifiers.",
+        "Uses only neutral synthetic examples and preserves the existing input/CLI compatibility.",
+        "Reports the unavailable write capability and does not invent a contribution link or claim publication."
+      ]
+    },
+    {
+      "id": 12,
+      "prompt": "You have finished the explicitly approved skill-improvement contribution, and its focused PR is open with validation reported. Close out this contribution task. Do not open another contribution or start another feedback cycle.",
+      "expected_output": "A final handoff of the existing contribution, with no recursive post-task reflection, new PR, watcher, or automatic merge.",
+      "files": [],
+      "assertions": [
+        "Does not recursively run the improvement loop at the end of a skill-improvement task.",
+        "Does not merge, modify installed skill files, grant access, or create persistent automation."
+      ]
+    },
+    {
+      "id": 13,
+      "prompt": "A draft slide says 'Unlock resilient execution alignment via async orchestration.' The actual point is that a service queues a job and returns a response before the worker finishes. Readers will not have our discussion for context. Replace the jargon with a concrete title, familiar labels, and a short explanation, without claiming that queuing guarantees completion. No fixed word-count reduction is required.",
+      "expected_output": "Context-independent copy and a meaningful service-to-queue-to-worker visual whose main point and caveat are understandable from the slide alone.",
+      "files": [],
+      "assertions": [
+        "Uses concrete nouns and direct verbs rather than slogans, inflated abstractions, or compressed jargon.",
+        "Explains asynchronous completion in plain language, keeping the no-guarantee qualification visible.",
+        "An unfamiliar reader can identify what the slide shows and its main takeaway without the conversation."
+      ]
+    },
+    {
+      "id": 14,
+      "prompt": "Turn this word-heavy explanation into a useful visual comparison: a queue worker receives jobs and records results; a request-driven service returns responses while background completion requires a separate design; a scheduled batch job processes pending work on its schedule. All are proposals and no completion times were measured. Keep all alternatives and facts. Use original embedded SVG if useful; don't add decorative icons, external image services, or invented metrics.",
+      "expected_output": "A diagram-first or compact-table comparison with short plain labels, visible evidence qualifications, detailed notes, and readable alternatives to motion.",
+      "files": [],
+      "assertions": [
+        "Selects a visual that explains the actual relationship or tradeoff rather than a paragraph wall or decorative graphic quota.",
+        "Preserves every alternative and fact, including proposal status, schedule delay, and the absence of measurements.",
+        "Keeps essential caveats on-slide and provides accessible reader equivalents and detailed notes.",
+        "Any animation is finite and replayable, explains a meaningful change, and has a reduced-motion equivalent.",
+        "Makes no implicit image-service call or extra export."
+      ]
     }
   ]
 }
