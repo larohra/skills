@@ -6,78 +6,64 @@ compatibility: null
 
 # Animated Demo Slides
 
-Build beautiful, animated slide presentations using SVG graphics and smooth transitions. This skill helps technical professionals communicate complex ideas through a series of clean, easy-to-follow visual slides in a standalone HTML file.
+Build animated SVG presentations that help an audience understand a system and answer a concrete question. Default to **one self-contained HTML deliverable**, with reproducible source kept alongside the work rather than extra presentation variants.
 
-## When to Use This Skill
+## Match the workflow to the request
 
-You want to create this skill when:
-- Explaining system architecture, data flows, or performance concepts
-- Building a demo for a design review, technical interview, or all-hands meeting
-- Creating a visual walkthrough of how something works (especially useful for audiences with varying English fluency)
-- You have a clear idea of what you want to show but need help turning it into polished visuals
+Use supplied context first: audience, question or decision, requested options, approved copy, and the named current artifact. Ask only about material ambiguity. A straightforward one-shot request does not need a fixed number of slides, approval gates, or another intake interview.
 
-## How It Works
+- **New deck:** establish the narrative and output contract, then build.
+- **Copy-first review:** when requested, or when material narrative choices remain unresolved, agree the copy before styling. In slide-by-slide mode, show the exact title, labels, summary, and key qualifications for one slide, record revisions in the source, and wait for that slide's approval before advancing.
+- **Small edit:** update the named current artifact and its reproducible source. A hyperlink or wording correction does not authorize a new deck, a redesign, or reopening settled choices.
 
-The skill uses **interactive refinement** to help you build the perfect presentation. Here's the flow:
+Read [authoring.md](references/authoring.md) for output/versioning decisions, copy review, taxonomy, and the bounded release checklist.
 
-1. **Describe your concept** in plain text — what's the main idea or narrative you want to tell?
-2. **Guided questions** help clarify: What are the key steps/states? What data or metrics matter? What should each slide focus on?
-3. **SVG slide generation** — the skill creates clean, animated SVGs for each concept
-4. **HTML framework** — all slides are bundled into a beautiful, interactive HTML file with keyboard navigation
-5. **Refinement cycles** — you review each slide and request changes (animation style, layout, data representation, etc.) until it matches your vision
+## Establish the output contract
 
-## What You'll Get
+Default to a single local HTML file. Follow already specified format, sharing, destination, and versioning choices; clarify unresolved choices before creating extra formats, public/embedded copies, or publishing. Do not automatically export PPTX or video.
 
-A standalone HTML file with:
-- **Keyboard navigation** — arrow keys to browse slides, keyboard shortcuts for help
-- **Clean dark theme** — professional GitHub-inspired design that works for tech audiences
-- **Animated SVGs** — smooth transitions and visual storytelling (e.g., bars filling, connections lighting up)
-- **Accessible layout** — readable fonts, high contrast, full-screen capable
-- **No external dependencies** — everything is self-contained in one file
+Identify the actual latest source and output before changing either. Preserve previous outputs unless replacement is authorized; do not trust an old open tab or rerun a generator against a preserved version. The generator refuses existing outputs by default; `--overwrite` is for an explicitly authorized in-place update, not a shortcut around a versioning decision.
 
-## Getting Started
+Keep contact sheets, screenshots, and temporary review files internal unless requested. Clean temporary QA files after review without deleting reproducible source or preserved outputs.
 
-Tell the skill:
-1. **What topic** you're explaining (e.g., "connection pool behavior", "database query optimization", "API architecture")
-2. **What story** you want to tell (e.g., "healthy state → degraded state → recovery with monitoring")
-3. **Any metrics or data** that should appear (numbers, percentages, state changes)
+## Write for understanding and decisions
 
-The skill will ask clarifying questions about:
-- How many slides you envision
-- What each slide should highlight
-- Whether animations should be simple (fade-in) or more complex (data flowing, states changing)
-- The narrative flow and transitions between concepts
+Write for someone who was not in the authoring conversation. Use concrete titles, familiar nouns, direct verbs, and short explanations of necessary acronyms or domain terms. State what the slide shows and the intended question, comparison, or decision. Avoid slogans, buzzwords, inflated abstractions, and compressed jargon added to sound smarter, while respecting creative language the user deliberately requests. Preserve meaning, accurate approved terminology, and factual qualifications rather than chasing a word-count reduction.
 
-## Iteration Process
+Inventory all requested alternatives before simplifying. Distinguish peer architectures from genuine variations; do not drop non-preferred options or change the taxonomy to fit a naming scheme. Keep a small glossary or shared slide data so SVG labels, reader text, notes, legends, and reference labels agree. Leave real source URLs and code identifiers unchanged.
 
-After generating your first draft:
-- Review each slide in the HTML file
-- Provide feedback like: "Make the numbers bigger", "Add a green glow when it's healthy", "Slow down the animation", "This slide is confusing, show the state change differently"
-- The skill will regenerate with refinements
+Clarify ambiguous domain terms instead of accepting a misleading claim. Distinguish goals, proposals, demonstrated proofs of concept, and production guarantees. Qualify performance claims with their evidence and conditions. Put detailed provenance in notes, but keep caveats needed to interpret a comparison visible on the slide.
 
-This typically takes 2–5 iterations per slide to get the vision right (that's normal — go with it).
+## Explain visually first
 
-## Tips for Best Results
+For each idea, first try a diagram, picture, chart, side-by-side comparison, or before/after view with short, plain labels. Choose the visual that explains the actual relationship, process, or change, not decorative icons or a quota of graphics. Original embedded SVG is a useful default; use properly authorized embedded pictures when they communicate more clearly, without adding image-service calls or dependencies. A compact table or brief prose is still valid when it explains the idea better than a drawing.
 
-- **Be specific with your description.** Don't just say "show database performance" — say "I want to show 100 database connections with 50 currently busy (green), 40 idle (dark), and 10 waiting (red)"
-- **Explain the narrative arc.** What's the problem → what's the solution → why does it matter?
-- **Give feedback in plain language.** You don't need to know SVG syntax. Say "the bars should animate upward" and let the skill handle the technical details.
-- **Iterate on what matters.** If a slide doesn't feel right, describe what's wrong and keep refining
+Keep detailed explanations and evidence in notes, with accessible reader equivalents and essential caveats still on the slide. Let finite, replayable animation reveal an understandable step or state change; do not use endless decorative motion. Review the result from an unfamiliar reader's perspective: can they explain the main point and takeaway from the slide itself, without the conversation?
 
-## Output Details
+## Build from the agreed source
 
-- **File format:** Single `.html` file (all SVGs embedded as base64)
-- **File size:** Typically 100KB–500KB depending on slide complexity
-- **Browser support:** Any modern browser (Chrome, Firefox, Safari, Edge)
-- **Interactivity:** View fullscreen (F key), navigate with arrow keys or side buttons
-- **Customization:** You can edit the HTML directly if needed (all SVGs are embedded for easy access)
+Read [generator.md](references/generator.md) for the JSON schema, command, links, viewer behavior, and focused tests.
 
-## Example Use Cases
+```text
+python scripts/build_presentation.py deck.json deck.html
+```
 
-**Performance Metrics Talk:** "Show how a connection pool starts healthy with 50/100 pipes busy, then becomes saturated when all 100 are in use, then how monitoring helps recovery"
+Keep the existing `title` / `slides` JSON structure; slides accept `name`, `svg`, and `description`. Optional slide titles, visible qualifications, notes, reference links/hotspots, and static SVG alternatives support richer decks without another output format. Use the same approved source for regeneration; do not apply broad search-and-replace across prose, URLs, and code.
 
-**Architecture Walkthrough:** "Diagram an API request flowing through load balancer → service mesh → database, showing where bottlenecks can happen"
+Author self-contained SVG with a sensible viewBox, readable text, sufficient contrast, and a meaningful text description. Use motion to reveal relationships, not to carry essential information alone. Supply a readable `static_svg` when the diagram must remain visible with reduced motion; without one, the generator hides the animated diagram and retains the text.
 
-**Feature Explain:** "Walk through the steps of a user authentication flow with visual indicators for success/failure states"
+Place supplied references at the diagram or row being discussed using visible native links or hotspots, with equivalent links in reader view and notes. SVG links inside an image are not interactive; use the wrapper's references instead. Preserve commit-pinned URLs and do not fetch references on deck load.
 
-**Incident Postmortem:** "Show timeline of an outage: normal operation → anomaly detection → alerting → human response → recovery"
+## Validate and deliver once
+
+Use the release checklist in [authoring.md](references/authoring.md): inspect every slide, desktop/mobile layouts, rendered text geometry, keyboard/notes/focus, reader view, reduced motion, and relevant embedding states in one batched pass. Fix observed defects together and confirm once rather than repeatedly polishing new exports.
+
+Navigation is in-memory and does not require history or hash writes. The skip control focuses the content directly, avoiding fragment resolution against an unsafe embedded base URL. Script execution varies by viewer; fullscreen, popups, and host policies are separate constraints. Never relax sandbox or tenant security to make a preview work, or treat simulated embedding as proof of a real deployment.
+
+Verify the actual final file/URL and preserved outputs. Report only validation actually performed and any remaining limitations. HTML/SVG/CSS animation is **not automatically preserved by native PowerPoint conversion**; treat a requested conversion as a separate fidelity decision, not a free extra.
+
+## Reflect once, contribute only with approval
+
+After completing the requested deliverable, briefly assess whether the task revealed a broadly reusable bug, missing instruction, or regression case. This must not delay or gate delivery. Do nothing if there is no useful new lesson, the lesson is already covered or proposed, or a contribution was declined. Do not turn one user's topic, style, or preferences into universal rules.
+
+For an actionable lesson, follow [contributing.md](references/contributing.md): identify the declared contribution repository, deduplicate, show a small sanitized proposal, and obtain explicit publication approval before creating a branch, pushing, or submitting a PR. A prior request explicitly authorizing that contribution and destination already supplies approval. Never infer the destination from an unrelated task repository, publish task data, edit the installed skill, or add runtime callbacks or persistent automation. Reflect once per completed authoring task, not per slide or iteration, and never recurse at the end of a skill-improvement contribution.
