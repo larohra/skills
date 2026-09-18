@@ -1,0 +1,57 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Create release
+    runs-on: ubuntu-latest
+
+    steps:
+      # This workflow only automates patch releases; minor/major bumps
+      # must still be created manually (e.g. by tagging before merging).
+      - name: Create next patch release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          existing_release_tag="$(
+            gh api "repos/${REPO}/releases" --paginate \
+              --jq "[.[] | select(.target_commitish == \"${SHA}\") | .tag_name] | first // empty"
+          )"
+
+          if [[ -n "${existing_release_tag}" ]]; then
+            echo "Release ${existing_release_tag} already targets ${SHA}; skipping."
+            exit 0
+          fi
+
+          latest_tag="$(
+            gh api "repos/${REPO}/git/matching-refs/tags/v" --paginate \
+              --jq '.[].ref | sub("^refs/tags/"; "") | select(test("^v(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"))' |
+              sort -V |
+              tail -n 1
+          )"
+
+          latest_tag="${latest_tag:-v0.0.0}"
+          version="${latest_tag#v}"
+          IFS=. read -r major minor patch <<< "${version}"
+          next_tag="v${major}.${minor}.$((10#${patch} + 1))"
+
+          echo "Creating release ${next_tag} for ${SHA}."
+          gh release create "${next_tag}" \
+            --repo "${REPO}" \
+            --target "${SHA}" \
+            --generate-notes

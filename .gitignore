@@ -1,3 +1,7 @@
+# Python bytecode artifacts
+__pycache__/
+*.py[cod]
+
 # Local demo captures, media, and Playwright state
 *.webm
 *.mp4
