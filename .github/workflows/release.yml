@@ -18,6 +18,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # This workflow only automates patch releases; minor/major bumps
+      # must still be created manually (e.g. by tagging before merging).
       - name: Create next patch release
         env:
           GH_TOKEN: ${{ github.token }}
