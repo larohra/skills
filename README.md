@@ -4,6 +4,7 @@ A collection of shareable [GitHub Copilot](https://github.com/features/copilot) 
 
 ## Available skills
 
+- [`design-excellence`](skills/design-excellence/) — Apply design-director-level refinement to any visual output (decks, dashboards, HTML, spreadsheets, PDFs, charts): build a functional version, then silently elevate it through a systematic protocol.
 - [`playwright-demo-video`](skills/playwright-demo-video/) — Plan, record, edit, and review polished Playwright-based product demo videos.
 
 ## Installation
