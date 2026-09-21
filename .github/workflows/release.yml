@@ -29,7 +29,7 @@ jobs:
           existing_release_tag="$(
             gh api "repos/${REPO}/releases" --paginate \
               --jq ".[] | select(.target_commitish == \"${SHA}\") | .tag_name" |
-              head -n 1
+              sed -n '1p'
           )"
 
           if [[ -n "${existing_release_tag}" ]]; then
@@ -47,6 +47,9 @@ jobs:
           latest_tag="${latest_tag:-v0.0.0}"
           version="${latest_tag#v}"
           IFS=. read -r major minor patch <<< "${version}"
+          major=$((10#${major}))
+          minor=$((10#${minor}))
+          patch=$((10#${patch}))
           next_tag="v${major}.${minor}.$((patch + 1))"
 
           echo "Creating release ${next_tag} for ${SHA}."
