@@ -293,7 +293,8 @@ Use for documentation, product explainers, technical reports, admin interfaces, 
 --neutral-100: #f4f4f5; --neutral-200: #e4e4e7; --neutral-300: #d4d4d8;
 --neutral-500: #71717a; --neutral-700: #3f3f46; --neutral-900: #18181b;
 --neutral-950: #09090b; --accent: #3457d5; --accent-soft: #e9edff;
---space: 4px 8px 12px 16px 24px 32px 48px 64px 96px; --radius-sm: 4px; --radius-md: 8px;
+--space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 24px;
+--space-6: 32px; --space-7: 48px; --space-8: 64px; --space-9: 96px; --radius-sm: 4px; --radius-md: 8px;
 --radius-lg: 12px; --border: 1px solid rgba(24, 24, 27, 0.10); --shadow-1: 0 1px 2px rgba(24, 24, 27, 0.06);
 --shadow-2: 0 12px 32px rgba(24, 24, 27, 0.10), 0 2px 8px rgba(24, 24, 27, 0.05);
 }
@@ -309,7 +310,8 @@ Use for monitoring, operations, developer tools, and high-density dashboards vie
 --neutral-800: #1b1f26; --neutral-700: #2c323d; --neutral-500: #788296;
 --neutral-300: #b7bfcc; --neutral-100: #edf0f5; --accent: #7c8cff;
 --accent-soft: rgba(124, 140, 255, 0.16); --success: #5fcf9a; --warning: #e2b45b;
---danger: #ef7b7b; --space: 4px 8px 12px 16px 20px 24px 32px 48px 64px; --radius-sm: 4px;
+--danger: #ef7b7b; --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+--space-5: 20px; --space-6: 24px; --space-7: 32px; --space-8: 48px; --space-9: 64px; --radius-sm: 4px;
 --radius-md: 7px; --radius-lg: 10px; --border: 1px solid rgba(255, 255, 255, 0.08);
 --shadow-1: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 2px 8px rgba(0, 4, 16, 0.28); --shadow-2: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 20px 48px rgba(0, 4, 16, 0.42);
 }
@@ -324,7 +326,8 @@ Use for presentations, launch narratives, annual-report openings, essays, and vi
 --type-3xl: 62px; --type-4xl: 84px; --paper: #f7f3ec;
 --paper-deep: #eee7dc; --ink: #211f1c; --muted: #6f675d;
 --rule: #cfc5b6; --accent: #9f2f24; --accent-soft: #ead7d2;
---secondary: #315b56; --space: 4px 8px 16px 24px 32px 48px 72px 96px 144px; --radius-sm: 2px;
+--secondary: #315b56; --space-1: 4px; --space-2: 8px; --space-3: 16px; --space-4: 24px;
+--space-5: 32px; --space-6: 48px; --space-7: 72px; --space-8: 96px; --space-9: 144px; --radius-sm: 2px;
 --radius-md: 6px; --border: 1px solid rgba(60, 48, 35, 0.18); --shadow-1: 0 2px 8px rgba(72, 58, 42, 0.08);
 --shadow-2: 0 24px 64px rgba(72, 58, 42, 0.14);
 }
@@ -338,7 +341,8 @@ Use for structured decks, public-information graphics, architecture overviews, p
 --type-xl: 31px; --type-2xl: 42px; --type-3xl: 56px;
 --type-4xl: 75px; --white: #f7f7f5; --gray-100: #e8e8e5;
 --gray-300: #b9b9b4; --gray-600: #646460; --black: #11110f;
---accent: #d7261e; --space: 4px 8px 12px 16px 24px 32px 48px 64px 96px 128px; --radius: 0;
+--accent: #d7261e; --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 24px;
+--space-6: 32px; --space-7: 48px; --space-8: 64px; --space-9: 96px; --space-10: 128px; --radius: 0;
 --border: 1px solid #11110f; --shadow-1: none; --shadow-2: none;
 --columns: 12; --gutter: 24px;
 }
@@ -353,7 +357,8 @@ Use for policies, research reports, printable PDFs, proposals, and long-form mat
 --type-3xl: 41px; --paper: #fbf8f1; --paper-raised: #fffdf8;
 --paper-deep: #f0eadf; --ink: #29251f; --muted: #6d655a;
 --rule: #d8cfc1; --accent: #2f665c; --accent-soft: #dfeae5;
---note: #eee4cf; --space: 4px 8px 12px 16px 24px 32px 48px 64px 96px; --radius-sm: 2px;
+--note: #eee4cf; --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 24px;
+--space-6: 32px; --space-7: 48px; --space-8: 64px; --space-9: 96px; --radius-sm: 2px;
 --radius-md: 5px; --border: 1px solid #d8cfc1; --shadow-1: 0 1px 3px rgba(70, 55, 38, 0.06);
 --shadow-2: 0 16px 36px rgba(70, 55, 38, 0.10);
 }
