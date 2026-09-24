@@ -188,6 +188,8 @@ Use tabular numerals for metrics, financial values, timestamps, ranks, and colum
 
 Match weight to size. Small light text fails quickly; use at least regular or medium weight for small labels. Avoid fake bold, fake italics, and too many adjacent weights.
 
+For diagrams, slides, and demos, distinguish source type size from effective rendered size. A label authored at a nominally acceptable size can become unreadable when a full canvas is fitted into a lower-resolution viewport. Before adding outlines or shadows, increase critical-label size and weight, shorten the label, or reduce surrounding density. If a light label sits on a colored status surface, darken the surface enough to preserve contrast; a narrow contrasting keyline is a fallback for display degradation, not a substitute for adequate size and contrast.
+
 Prevent orphaned headings, single-word final lines in prominent copy, stranded captions, and headings detached from their content. Keep a heading with at least two lines of following content where the medium permits.
 
 Apply optical alignment. Align the visible edge of glyphs and icons, not only their bounding boxes. Allow punctuation or large quotation marks to hang slightly when it improves the text edge.
@@ -363,6 +365,7 @@ For slides:
 - Render every slide.
 - Inspect thumbnails for pacing and system consistency.
 - Inspect actual presentation size for readability.
+- Inspect projected or demo decks at a realistic lower-bound viewport, such as 1366×768 in fit-to-window mode, without authoring zoom.
 - Check overflow, safe margins, image quality, and transition restraint.
 
 For spreadsheets:
@@ -381,6 +384,7 @@ For PDF and print:
 For charts and diagrams:
 
 - Check labels at final size.
+- Check critical labels after the full diagram has been scaled into its intended viewport; vector output alone does not guarantee legibility.
 - Verify scale integrity, units, source notes, direct labeling, and non-color differentiation.
 - Confirm connectors, arrows, and reading direction remain clear.
 

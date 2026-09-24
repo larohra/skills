@@ -361,9 +361,15 @@ Use these questions internally before delivering any visual artifact. For each q
 
 ### Is all text readable at actual use size?
 
-**Good answer:** The artifact is checked at projected distance, screen zoom, phone width, spreadsheet scale, or printed size as appropriate.
+**Good answer:** The artifact is checked at projected distance, screen zoom, phone width, spreadsheet scale, or printed size as appropriate. Demo and projection artifacts also receive a fit-to-window check at a realistic lower-bound display such as 1366×768, with attention to the effective rendered size of labels inside diagrams.
 
 **Common failure:** Readability is judged while zoomed in during authoring.
+
+### Do critical labels survive display degradation?
+
+**Good answer:** Critical labels remain distinct after scaling and on a lower-quality display because size, weight, density, and foreground/background contrast do the primary work. A restrained keyline is used only when the rendered check proves it helps.
+
+**Common failure:** Vector output is assumed to guarantee readability, or bright semantic fills cause light text to bloom and lose its edges.
 
 ### Are focus and keyboard states visible and logical?
 

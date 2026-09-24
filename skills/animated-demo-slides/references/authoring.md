@@ -82,6 +82,7 @@ Build the complete agreed deck, then inspect all of the following in one batched
 - Every slide's exact title, labels, summary, caveats, option inventory, and source links against the approved copy.
 - Context-independent wording and a meaningful visual relationship, not jargon or a wall of bullets; the main point and takeaway should stand alone.
 - Rendered text bounds, clipping, overlap, contrast, and useful target sizes. Measure actual rendered geometry rather than repeatedly shrinking labels or applying a fixed word-count reduction.
+- Projection and low-resolution legibility at a realistic lower-bound viewport, such as 1366×768 in fit-to-window mode. Judge the effective rendered size of diagram labels rather than their source SVG font size; vector output does not rescue undersized or low-contrast text after the full canvas is scaled. Increase critical-label size and weight or reduce density first. For light text on semantic fills, prefer a darker fill and add a restrained contrasting keyline only when the rendered check shows a real improvement.
 - Desktop and narrow/mobile layouts, long text, and reader mode. Preserve readable text instead of treating a shrunken diagram as a sufficient mobile view.
 - Previous/next, first/last, Space, and boundary behavior; native controls and links through Tab/Enter; notes through their native disclosure control; skip focus and focus when changing views.
 - Finite, replayable animation and reduced motion with a static diagram or an honest text fallback, including qualifications and references.

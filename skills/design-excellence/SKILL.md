@@ -134,6 +134,8 @@ Accessibility and legibility are non-negotiable constraints, not optional cleanu
 
 For screen content, target at least 4.5:1 contrast for normal text and 3:1 for large text and meaningful interface graphics. Do not use muted text below readable contrast merely to make the page feel refined. Keep body text generally at 16px or larger on the web, presentation body text large enough for the room, and print body text appropriate to the typeface and reproduction method.
 
+For projected decks, screen-shared demos, and large displays with uncertain quality, verify the artifact at a realistic lower-bound viewport such as 1366×768 in fit-to-window mode. Judge the effective rendered size, not the font size stored in an SVG or slide source: vector geometry prevents source-image pixelation but cannot make undersized or low-contrast type legible after scaling and display degradation. Enlarge and strengthen critical labels or reduce diagram density before adding effects. When light text sits on a semantic fill, prefer a sufficiently dark fill; use a restrained contrasting keyline only when a rendered low-resolution check shows that it improves edge separation.
+
 Provide visible focus states, logical keyboard order, semantic headings, text alternatives where needed, and sufficiently large targets. Respect reduced-motion preferences. Do not encode status, series, priority, or error using color alone; add labels, shapes, patterns, position, or icons.
 
 Accessibility can sharpen the design. Resolve conflicts through hierarchy, wording, spacing, and stronger role separation rather than by quietly lowering the accessibility bar.
@@ -149,6 +151,8 @@ Centering is a special-purpose composition, not a default alignment. Use left al
 ## Verify the rendered result
 
 Inspect the actual artifact, not only its source. Use browser screenshots for HTML, rendered slides for decks, exported pages for PDF and print, and application or file previews for spreadsheets. Check representative narrow and wide layouts, dense and sparse content, and at least one edge case.
+
+For presentation artifacts intended for demos or projection, include one lower-resolution fit-to-window render in the inspection set. Confirm that critical labels remain distinct without authoring zoom and that semantic fills do not bloom into light text.
 
 Confirm that:
 
