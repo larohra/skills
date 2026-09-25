@@ -6,6 +6,7 @@ A collection of shareable [GitHub Copilot](https://github.com/features/copilot) 
 
 - [`animated-demo-slides`](skills/animated-demo-slides/) — Create polished animated SVG-based slide presentations for technical explanations, demos, and design reviews.
 - [`design-excellence`](skills/design-excellence/) - Apply design-director-level refinement to any visual output (decks, dashboards, HTML, spreadsheets, PDFs, charts): build a functional version, then silently elevate it through a systematic protocol.
+- [`feature-issue-creator`](skills/feature-issue-creator/) - Turn feature ideas and conversation context into clear GitHub tracking issues through focused questions and approval before publishing.
 - [`playwright-demo-video`](skills/playwright-demo-video/) — Plan, record, edit, and review polished Playwright-based product demo videos.
 - [`run-simple-spike`](skills/run-simple-spike/) — Run a small, evidence-backed engineering spike with one question, one explicit pass criterion, and one tiny real flow on the intended runtime.
 
