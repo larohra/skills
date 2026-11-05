@@ -8,6 +8,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SKILLS_DIR = ROOT / "skills"
+EXPECTED_TITLES = {"msrc-triage": "MSRC / ICM Case Triage"}
 
 PRIVATE_PLAYBOOK_TERM = "agent" + "-" + "playbook"
 
@@ -56,7 +57,10 @@ def validate_skill(path: Path) -> list[str]:
         errors.append(f"{path}: description is missing or too short")
 
     text = path.read_text(encoding="utf-8")
-    if f"# {expected_name.replace('-', ' ').title()}" not in text:
+    expected_title = EXPECTED_TITLES.get(
+        expected_name, expected_name.replace("-", " ").title()
+    )
+    if f"# {expected_title}" not in text:
         errors.append(f"{path}: missing title heading for {expected_name!r}")
 
     return errors
